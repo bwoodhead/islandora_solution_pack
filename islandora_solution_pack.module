@@ -1,0 +1,366 @@
+<?php
+
+/**
+ * Islandora menu hook
+ * @return string 
+ */
+function islandora_solution_pack_menu() {
+
+    // Create an array to return
+    $items = array();
+
+    $items['solution_pack'] = array(
+        'title' => 'Islandora New Solution Pack',
+        'description' => '',
+        'page callback' => 'islandora_solution_pack_page',
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM
+    );
+    
+    $items['solution_pack/install'] = array(
+        'title' => 'Islandora New Solution Pack Installer',
+        'description' => '',
+        'page callback' => 'islandora_solution_pack_install_endpoint',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+    
+    $items['solution_pack/dump'] = array(
+        'title' => 'Islandora New Solution Pack Dump',
+        'description' => '',
+        'page callback' => 'islandora_solution_pack_dump_endpoint',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+    
+    // Return the link
+    return $items;
+}
+
+/**
+ * hook for loading the page 
+ */
+function islandora_solution_pack_page() {
+    
+    // Load the admin form
+    return drupal_get_form('islandora_solution_pack_admin_form');
+}
+
+/**
+ * Create an admin form
+a */
+function islandora_solution_pack_admin_form($form_state) 
+{
+    // Get all the enabled solution packs
+    $enabled_solution_packs = module_invoke_all('register_solution_pack');
+    
+    // Install all of them ( or we could show a status )
+    foreach($enabled_solution_packs as $module => $title)
+    {
+        /**********************************/
+        // Get the solution pack information
+        /**********************************/
+        $form[$module]['title'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Title'),
+            '#default_value' => $title,
+        );
+
+        /**********************************/
+        // Get the xml forms
+        /**********************************/
+        $xmlforms = module_invoke($module, 'register_solution_pack_forms');
+        $form[$module]['forms']['label'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Mods Form Label'),
+            '#default_value' => $xmlforms['islandora_docs_sp']['label'],
+        );
+        $form[$module]['forms']['file'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Mods File'),
+            '#default_value' => $xmlforms['islandora_docs_sp']['file'],
+        );
+        
+        /**********************************/
+        // Get the content models
+        /**********************************/
+        $content_models = module_invoke($module, 'register_solution_pack_content_models');
+        
+        $form[$module]['content_models']['pid'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Content Model PID'),
+            '#default_value' => $content_models['islandora_docs_sp']['pid'],
+        );
+        $form[$module]['content_models']['label'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Content Model label'),
+            '#default_value' => $content_models['islandora_docs_sp']['label'],
+        );
+        $form[$module]['content_models']['form'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Content Model form'),
+            '#default_value' => $content_models['islandora_docs_sp']['form'],
+        );
+        $form[$module]['content_models']['dsid'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Content Model dsid'),
+            '#default_value' => $content_models['islandora_docs_sp']['dsid'],
+        );
+        $form[$module]['content_models']['datastream_file'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Content Model datastream_file'),
+            '#default_value' => $content_models['islandora_docs_sp']['datastream_file'],
+        );
+
+        /**********************************/
+        // Get the collections
+        /**********************************/
+        $collections = module_invoke($module, 'register_solution_pack_collection');
+        var_dump($collections);
+        
+        $form[$module]['collections']['pid'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection PID'),
+            '#default_value' => $collections['islandora_docs_sp']['pid'],
+        );        
+        $form[$module]['collections']['label'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection Label'),
+            '#default_value' => $collections['islandora_docs_sp']['label'],
+        );        
+        $form[$module]['collections']['cmodel'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection CModel'),
+            '#default_value' => $collections['islandora_docs_sp']['cmodel'],
+        );        
+        $form[$module]['collections']['parent'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection Parent'),
+            '#default_value' => $collections['islandora_docs_sp']['parent'],
+        );        
+        $form[$module]['collections']['dsid'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection Dsid'),
+            '#default_value' => $collections['islandora_docs_sp']['dsid'],
+        );        
+        $form[$module]['collections']['datastream_file'] = array(
+            '#type' => 'textfield',
+            '#title' => t(''),
+            '#default_value' => $collections['islandora_docs_sp']['datastream_file'],
+        );        
+        $form[$module]['collections']['thumbnail_file'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection Thumbnail File'),
+            '#default_value' => $collections['islandora_docs_sp']['thumbnail_file'],
+        );        
+        $form[$module]['collections']['thumbnail_mimetype'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Collection Thumbnail Mimetype'),
+            '#default_value' => $collections['islandora_docs_sp']['thumbnail_mimetype'],
+        );        
+    }
+    
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save'),
+    );
+    
+    return $form;
+}
+
+
+function islandora_solution_pack_admin_form_submit($form_id, $form_values) {
+    var_dump($form_id);
+    var_dump($form_values);
+}
+
+/**
+ * Endpoint for installing a solution pack 
+ */
+function islandora_solution_pack_install_endpoint()
+{
+    echo("results");
+}
+
+
+/**
+ * Endpoint for installing a solution pack 
+ */
+function islandora_solution_pack_dump_endpoint()
+{
+    $enabled_solution_packs = module_invoke_all('register_solution_pack');
+    var_dump($enabled_solution_packs);
+
+    $forms = module_invoke_all('register_solution_pack_forms');
+    var_dump($forms);
+
+    $content_models = module_invoke_all('register_solution_pack_content_models');
+    var_dump($content_models);
+    
+    $collections = module_invoke_all('register_solution_pack_collection');
+    var_dump($collections);   
+}
+
+/**
+ * Display the contents of a solution pack
+ * @param type $module
+ * @param type $title 
+ */
+function display_solution_pack($module, $title)
+{
+   $forms = module_invoke_all('register_solution_pack_forms');
+    var_dump($forms);
+
+    $content_models = module_invoke_all('register_solution_pack_content_models');
+    var_dump($content_models);
+    
+    $collections = module_invoke_all('register_solution_pack_collection');
+    var_dump($collections);    
+}
+
+/**
+ * Install solution pack helper function
+ * @param type $module
+ * @param type $title
+ * @param type $force
+ * @return type 
+ */
+function install_solution_pack($module, $title, $force=false)
+{
+    // Check to see if there is anything to do
+    if ( is_installed() && $force == false)
+    {
+        return;
+    }
+    
+    $forms = module_invoke_all('register_solution_pack_forms');
+    var_dump($forms);
+
+    $content_models = module_invoke_all('register_solution_pack_content_models');
+    var_dump($content_models);
+    
+    $collections = module_invoke_all('register_solution_pack_collection');
+    var_dump($collections);
+    
+}
+
+/**
+ * is the module installed
+ * @param type $module 
+ */
+function is_installed($module)
+{
+    
+}
+
+/**
+ * Solution pack register form 
+ * @param type $mods_form_name The MODS form name "Islandora Docs MODS Form"
+ * @param type $mods_form_file The MODS form file name relative to the module (solutionpack/xml/mods_article.xml)
+ * @return int 0 = Ok and 1 = Unable to load file
+ */
+function solution_pack_register_form($mods_form_name, $mods_form_file, $force=false)
+{
+    // Lookup the form
+    $results = db_result(db_query('Select name from {xml_forms} where name = "%s"', $mods_form_name));
+    
+    // Check to see if there is anything to do
+    if ( $results && $force==false) {
+        
+        // Nothing to do so early out
+        return 0;
+    }
+    
+    // Get the contents of the file
+    $mods_form_data = file_get_contents($mods_form_file);
+    
+    // Didn't load the file
+    if ( ! $mods_form_data ) {
+        
+        // Return an error
+        return 1;
+    }
+    
+    // Create the data model
+    $object = new stdClass();
+    $object->name = $mods_form_name;
+    $object->form = $mods_form_data;
+    
+    // Are we adding the form
+    if ( ! $results ) {
+        
+        // Add the model to the database
+        $result = drupal_write_record('xml_forms', $object);
+        
+    } else {
+        
+        // Update the model in the database
+        $result = drupal_write_record('xml_forms', $object, array("name" => $mods_form_name));
+    }
+
+    // Log the action
+    drupal_set_message(t("Added @name", array("@name" => $mods_form_name)));
+}
+
+/**
+ * Solution pack register form 
+ * @param type $mods_form_name The MODS form name "Islandora Docs MODS Form"
+ * @param type $content_model The Content Model (islandora:docs_sp_cm)
+ */
+function solution_pack_register_form_association($mods_form_name, $content_model, $force=false) {
+    
+    // Query the database for previous associations
+    $results = db_result(db_query('Select content_model from {islandora_content_model_forms} where content_model = "%s" and form_name = "%s"',
+              $content_model, $mods_form_name));
+    
+    // Check to see if there is anything to do
+    if ( $results && $force==false) {
+        
+        // Nothing to do so early out
+        return;
+    }
+
+    // Create a model for the database 
+    $object = new stdClass();
+    $object->content_model = $content_model;
+    $object->form_name = $mods_form_name;
+    $object->dsid = 'MODS';
+    $object->title_field = "['titleInfo']['title']";
+    $object->transform = 'mods_to_dc.xsl';
+
+    // Are we adding the form association
+    if ( ! $results ) {
+        
+        // Add the association
+        $result = drupal_write_record('islandora_content_model_forms', $object);
+    } else {
+        
+        // Update the association
+        $result = drupal_write_record('islandora_content_model_forms', $object, array("content_model" => $content_model));
+    }
+
+    // Log the action
+    drupal_set_message(t("Added association between @cm@name", array("@cm" => $content_model, "@name"=>$mods_form_name)));
+}
+
+/**
+ * Solution pack unregister form
+ * @param type $mods_form_name The MODS form name "Islandora Docs MODS Form"
+ */
+function solution_pack_unregister_form($mods_form_name)
+{
+ 
+}
+
+/**
+ * Solution pack unregister form
+ * @param type $mods_form_name The MODS form name "Islandora Docs MODS Form"
+ * @param type $content_model The Content Model (islandora:docs_sp_cm)
+ */
+function solution_pack_unregister_form_association($mods_form_name, $content_model)
+{
+ 
+}
+
+
+?>

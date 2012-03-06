@@ -1,0 +1,7 @@
+name = Islandora Solution Pack
+description = Islandora solution pack
+dependencies[] = fedora_repository
+package = Islandora
+version = 11.3.1
+core = 6.x
+
