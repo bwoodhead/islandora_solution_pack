@@ -186,16 +186,17 @@ function islandora_solution_pack_admin_form($form_state)
         $form[$module]['submit'] = array(
             '#type' => 'submit',
             '#value' => t('Submit'),
+            '#name' => $module,
             '#ahah' => array(
                 'event' => 'click',
                 'path' => 'solution_pack/install',
                 'wrapper' => 'server_response-wrapper',
                 'method' => 'replace',
                 'effect' => 'fade',
-                'progress' => array(
-                    'type' => 'bar',
-                    'message' => t('Loading...')
-                ),
+                //'progress' => array(
+                //    'type' => 'bar',
+                //    'message' => t('Loading...')
+                //),
             ),      
         );
         
@@ -215,10 +216,17 @@ function islandora_solution_pack_admin_form($form_state)
  */
 function islandora_solution_pack_install_endpoint()
 {
-    echo drupal_json(array('status' => TRUE, 'data' => serialize($_POST)));
-    //var_dump($_POST);
-    //$json = json_decode($_POST['json_data']);
-    //install_solution_pack($json['module_name']);
+    foreach($_POST as $key => $value) {
+        
+        if ($_POST[$key] == 'Submit')
+        {
+            install_solution_pack($key);
+            echo drupal_json(array('status' => TRUE, 'data' => 'Success'));
+            return;
+        }
+    }
+   
+    echo drupal_json(array('status' => TRUE, 'data' => "Failed"));
 }
 
 /**
@@ -226,12 +234,22 @@ function islandora_solution_pack_install_endpoint()
  */
 function islandora_solution_pack_status_endpoint()
 {
-    $json = json_decode($_POST['json_data']);
-
-    if ( is_installed($json['module_name']) ) {
-        echo('installed');
-    } 
-    echo('status: ' + $json['module_name']);
+    foreach($_POST as $key => $value) {
+        
+        if ($_POST[$key] == 'Submit')
+        {
+            if ( is_installed($json['module_name']) ) {
+        
+                echo drupal_json(array('status' => TRUE, 'data' => 'Installed'));
+            } else {
+                
+                echo drupal_json(array('status' => TRUE, 'data' => 'Not Installed'));
+            }
+        }
+    }
+  
+    // Not found
+    echo drupal_json(array('status' => TRUE, 'data' => 'Failed'));
 }
 
 /**
@@ -269,11 +287,9 @@ function install_solution_pack($module, $force=false)
     
     // Get the form details
     $form_details = module_invoke($module, 'register_solution_pack_forms');
-    var_dump($form_details);
-    
+
     // Ge the content model details
     $content_models = module_invoke($module, 'register_solution_pack_content_models');
-    var_dump($content_models);
     
     // Register the forms
     solution_pack_register_form($form_details[$module]['label'], $form_details[$module]['file'], $force);
