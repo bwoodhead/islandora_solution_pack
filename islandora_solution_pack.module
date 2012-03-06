@@ -71,12 +71,20 @@ function islandora_solution_pack_admin_form($form_state)
         /**********************************/
         // Get the solution pack information
         /**********************************/
+        $form[$module] = array(
+            '#type' => 'fieldset',
+            '#title' => $title,
+            '#description' => t(''),
+            '#collapsible' => TRUE,
+            '#collapsed' => TRUE,
+        );                     
+
         $form[$module]['title'] = array(
             '#type' => 'textfield',
             '#title' => t('Title'),
             '#default_value' => $title,
         );
-
+        
         /**********************************/
         // Get the xml forms
         /**********************************/
