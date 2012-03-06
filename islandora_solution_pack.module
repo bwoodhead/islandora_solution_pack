@@ -140,7 +140,8 @@ function islandora_solution_pack_admin_form($form_state)
             '#type' => 'textfield',
             '#title' => t('Collection PID'),
             '#default_value' => $collections[$module]['pid'],
-        );        
+        );
+        
         $form[$module]['collections']['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Label'),
@@ -150,51 +151,63 @@ function islandora_solution_pack_admin_form($form_state)
             '#type' => 'textfield',
             '#title' => t('Collection CModel'),
             '#default_value' => $collections[$module]['cmodel'],
-        );        
+        );
+        
         $form[$module]['collections']['parent'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Parent'),
             '#default_value' => $collections[$module]['parent'],
-        );        
+        );
+        
         $form[$module]['collections']['dsid'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Dsid'),
             '#default_value' => $collections[$module]['dsid'],
-        );        
+        );
+        
         $form[$module]['collections']['datastream_file'] = array(
             '#type' => 'textfield',
             '#title' => t(''),
             '#default_value' => $collections[$module]['datastream_file'],
-        );        
+        );
+        
         $form[$module]['collections']['thumbnail_file'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Thumbnail File'),
             '#default_value' => $collections[$module]['thumbnail_file'],
-        );        
+        );
+        
         $form[$module]['collections']['thumbnail_mimetype'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Thumbnail Mimetype'),
             '#default_value' => $collections[$module]['thumbnail_mimetype'],
-        );        
+        );
+        
+        $form[$module]['submit'] = array(
+            '#type' => 'submit',
+            '#value' => t('Submit'),
+            '#ahah' => array(
+                'event' => 'click',
+                'path' => 'solution_pack/install',
+                'wrapper' => 'server_response-wrapper',
+                'method' => 'replace',
+                'effect' => 'fade',
+                'progress' => array(
+                    'type' => 'bar',
+                    'message' => t('Loading...')
+                ),
+            ),      
+        );
+        
     }
-    
-    $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Save'),
+    $form['server_response'] = array(
+        '#type' => 'textfield',
+        '#title' => t('server_response'),
+        '#default_value' => '',
+        '#id' => 'server_response'
     );
-    
+
     return $form;
-}
-
-
-/**
- * Form submit callback
- * @param type $form_id
- * @param type $form_values 
- */
-function islandora_solution_pack_admin_form_submit($form_id, $form_values) {
-//    var_dump($form_id);
-//    var_dump($form_values);
 }
 
 /**
@@ -202,8 +215,10 @@ function islandora_solution_pack_admin_form_submit($form_id, $form_values) {
  */
 function islandora_solution_pack_install_endpoint()
 {
-    $json = json_decode($_POST['json_data']);
-    install_solution_pack($json['module_name']);
+    echo drupal_json(array('status' => TRUE, 'data' => serialize($_POST)));
+    //var_dump($_POST);
+    //$json = json_decode($_POST['json_data']);
+    //install_solution_pack($json['module_name']);
 }
 
 /**
