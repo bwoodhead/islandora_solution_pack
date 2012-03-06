@@ -17,7 +17,7 @@ function islandora_solution_pack_menu() {
         'type' => MENU_NORMAL_ITEM
     );
     
-    $items['solution_pack/install'] = array(
+    $items['solution_pack/%module/install'] = array(
         'title' => 'Islandora New Solution Pack Installer',
         'description' => '',
         'page callback' => 'islandora_solution_pack_install_endpoint',
@@ -25,13 +25,31 @@ function islandora_solution_pack_menu() {
         'type' => MENU_CALLBACK
     );
     
-    $items['solution_pack/dump'] = array(
+    $items['solution_pack/%module/forceinstall'] = array(
+        'title' => 'Islandora New Solution Pack Installer',
+        'description' => '',
+        'page callback' => 'islandora_solution_pack_forceinstall_endpoint',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+    
+    $items['solution_pack/%module/status'] = array(
+        'title' => 'Islandora New Solution Pack Status',
+        'description' => '',
+        'page callback' => 'islandora_solution_pack_status_endpoint',
+        'page arguments' => array(1),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );    
+    
+    $items['solution_pack/debug/dump'] = array(
         'title' => 'Islandora New Solution Pack Dump',
         'description' => '',
         'page callback' => 'islandora_solution_pack_dump_endpoint',
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
+   
     
     // Return the link
     return $items;
@@ -73,12 +91,12 @@ function islandora_solution_pack_admin_form($form_state)
         $form[$module]['forms']['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Mods Form Label'),
-            '#default_value' => $xmlforms['islandora_docs_sp']['label'],
+            '#default_value' => $xmlforms[$module]['label'],
         );
         $form[$module]['forms']['file'] = array(
             '#type' => 'textfield',
             '#title' => t('Mods File'),
-            '#default_value' => $xmlforms['islandora_docs_sp']['file'],
+            '#default_value' => $xmlforms[$module]['file'],
         );
         
         /**********************************/
@@ -89,74 +107,73 @@ function islandora_solution_pack_admin_form($form_state)
         $form[$module]['content_models']['pid'] = array(
             '#type' => 'textfield',
             '#title' => t('Content Model PID'),
-            '#default_value' => $content_models['islandora_docs_sp']['pid'],
+            '#default_value' => $content_models[$module]['pid'],
         );
         $form[$module]['content_models']['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Content Model label'),
-            '#default_value' => $content_models['islandora_docs_sp']['label'],
+            '#default_value' => $content_models[$module]['label'],
         );
         $form[$module]['content_models']['form'] = array(
             '#type' => 'textfield',
             '#title' => t('Content Model form'),
-            '#default_value' => $content_models['islandora_docs_sp']['form'],
+            '#default_value' => $content_models[$module]['form'],
         );
         $form[$module]['content_models']['dsid'] = array(
             '#type' => 'textfield',
             '#title' => t('Content Model dsid'),
-            '#default_value' => $content_models['islandora_docs_sp']['dsid'],
+            '#default_value' => $content_models[$module]['dsid'],
         );
         $form[$module]['content_models']['datastream_file'] = array(
             '#type' => 'textfield',
             '#title' => t('Content Model datastream_file'),
-            '#default_value' => $content_models['islandora_docs_sp']['datastream_file'],
+            '#default_value' => $content_models[$module]['datastream_file'],
         );
 
         /**********************************/
         // Get the collections
         /**********************************/
         $collections = module_invoke($module, 'register_solution_pack_collection');
-        var_dump($collections);
         
         $form[$module]['collections']['pid'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection PID'),
-            '#default_value' => $collections['islandora_docs_sp']['pid'],
+            '#default_value' => $collections[$module]['pid'],
         );        
         $form[$module]['collections']['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Label'),
-            '#default_value' => $collections['islandora_docs_sp']['label'],
+            '#default_value' => $collections[$module]['label'],
         );        
         $form[$module]['collections']['cmodel'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection CModel'),
-            '#default_value' => $collections['islandora_docs_sp']['cmodel'],
+            '#default_value' => $collections[$module]['cmodel'],
         );        
         $form[$module]['collections']['parent'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Parent'),
-            '#default_value' => $collections['islandora_docs_sp']['parent'],
+            '#default_value' => $collections[$module]['parent'],
         );        
         $form[$module]['collections']['dsid'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Dsid'),
-            '#default_value' => $collections['islandora_docs_sp']['dsid'],
+            '#default_value' => $collections[$module]['dsid'],
         );        
         $form[$module]['collections']['datastream_file'] = array(
             '#type' => 'textfield',
             '#title' => t(''),
-            '#default_value' => $collections['islandora_docs_sp']['datastream_file'],
+            '#default_value' => $collections[$module]['datastream_file'],
         );        
         $form[$module]['collections']['thumbnail_file'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Thumbnail File'),
-            '#default_value' => $collections['islandora_docs_sp']['thumbnail_file'],
+            '#default_value' => $collections[$module]['thumbnail_file'],
         );        
         $form[$module]['collections']['thumbnail_mimetype'] = array(
             '#type' => 'textfield',
             '#title' => t('Collection Thumbnail Mimetype'),
-            '#default_value' => $collections['islandora_docs_sp']['thumbnail_mimetype'],
+            '#default_value' => $collections[$module]['thumbnail_mimetype'],
         );        
     }
     
@@ -169,22 +186,49 @@ function islandora_solution_pack_admin_form($form_state)
 }
 
 
+/**
+ * Form submit callback
+ * @param type $form_id
+ * @param type $form_values 
+ */
 function islandora_solution_pack_admin_form_submit($form_id, $form_values) {
-    var_dump($form_id);
-    var_dump($form_values);
+//    var_dump($form_id);
+//    var_dump($form_values);
 }
 
 /**
  * Endpoint for installing a solution pack 
  */
-function islandora_solution_pack_install_endpoint()
+function islandora_solution_pack_install_endpoint($module)
 {
-    echo("results");
+    echo("install" + $module);
+    //
+    install_solution_pack($module);
 }
 
+/**
+ * Endpoint for forcing a reinstall of a solution pack
+ */
+function islandora_solution_pack_forceinstall_endpoint($module)
+{
+    echo("force install" + $module);
+
+    install_solution_pack($module, true);
+}
 
 /**
- * Endpoint for installing a solution pack 
+ * Endpoint for getting the status of a solution
+ */
+function islandora_solution_pack_status_endpoint($module)
+{
+    if ( is_installed($module) ) {
+        echo('installed');
+    } 
+    echo('status: ' + $module);
+}
+
+/**
+ * Debug Endpoint for showing all the data
  */
 function islandora_solution_pack_dump_endpoint()
 {
@@ -202,55 +246,51 @@ function islandora_solution_pack_dump_endpoint()
 }
 
 /**
- * Display the contents of a solution pack
- * @param type $module
- * @param type $title 
- */
-function display_solution_pack($module, $title)
-{
-   $forms = module_invoke_all('register_solution_pack_forms');
-    var_dump($forms);
-
-    $content_models = module_invoke_all('register_solution_pack_content_models');
-    var_dump($content_models);
-    
-    $collections = module_invoke_all('register_solution_pack_collection');
-    var_dump($collections);    
-}
-
-/**
  * Install solution pack helper function
  * @param type $module
  * @param type $title
  * @param type $force
  * @return type 
  */
-function install_solution_pack($module, $title, $force=false)
+function install_solution_pack($module, $force=false)
 {
     // Check to see if there is anything to do
-    if ( is_installed() && $force == false)
+    if ( is_installed($module) && $force == false)
     {
         return;
     }
     
-    $forms = module_invoke_all('register_solution_pack_forms');
-    var_dump($forms);
-
-    $content_models = module_invoke_all('register_solution_pack_content_models');
+    // Get the form details
+    $form_details = module_invoke($module, 'register_solution_pack_forms');
+    var_dump($form_details);
+    
+    // Ge the content model details
+    $content_models = module_invoke($module, 'register_solution_pack_content_models');
     var_dump($content_models);
     
-    $collections = module_invoke_all('register_solution_pack_collection');
-    var_dump($collections);
+    // Register the forms
+    solution_pack_register_form($form_details[$module]['label'], $form_details[$module]['file'], $force);
+    solution_pack_register_form_association($form_details[$module]['label'], $content_models[$module]['pid'], $force);
     
 }
 
 /**
- * is the module installed
+ * is the module installed (hacky)
  * @param type $module 
  */
 function is_installed($module)
 {
-    
+    // Get the form name
+    $form_details = module_invoke($module, 'register_solution_pack_forms');
+    $mods_form_name = $form_details[$module]['label'];
+
+    // Lookup the form
+    $results = db_result(db_query('Select name from {xml_forms} where name = "%s"', $mods_form_name));
+    if ( $results ) {
+        return true;
+    }
+        
+    return false;
 }
 
 /**
