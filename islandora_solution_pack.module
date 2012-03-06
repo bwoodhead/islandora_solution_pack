@@ -25,6 +25,15 @@ function islandora_solution_pack_menu() {
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
+
+    $items['solution_pack/forceinstall'] = array(
+        'title' => 'Islandora New Solution Pack Installer',
+        'description' => '',
+        'page callback' => 'islandora_solution_pack_forceinstall_endpoint',
+        'page arguments' => array(1),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
     
     $items['solution_pack/status'] = array(
         'title' => 'Islandora New Solution Pack Status',
@@ -34,15 +43,6 @@ function islandora_solution_pack_menu() {
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );    
-    
-    $items['solution_pack/dump'] = array(
-        'title' => 'Islandora New Solution Pack Dump',
-        'description' => '',
-        'page callback' => 'islandora_solution_pack_dump_endpoint',
-        'access arguments' => array('access content'),
-        'type' => MENU_CALLBACK
-    );
-   
     
     // Return the link
     return $items;
@@ -216,16 +216,50 @@ function islandora_solution_pack_admin_form($form_state)
  */
 function islandora_solution_pack_install_endpoint()
 {
+    // Loop through the post results
     foreach($_POST as $key => $value) {
         
-        if ($_POST[$key] == 'Submit')
+        // Find a key with the value submit
+        if ($value == 'Submit')
         {
+            // Install the solution pack
             install_solution_pack($key);
+            
+            // Return the results
             echo drupal_json(array('status' => TRUE, 'data' => 'Success'));
+            
+            // Leave the function
             return;
         }
     }
    
+    // Send a failed message
+    echo drupal_json(array('status' => TRUE, 'data' => "Failed"));
+}
+
+/**
+ * Endpoint for force installing a solution pack 
+ */
+function islandora_solution_pack_forceinstall_endpoint()
+{
+    // Loop through the post results
+    foreach($_POST as $key => $value) {
+        
+        // Find a key with the value submit
+        if ($value == 'Submit')
+        {
+            // Install the solution pack
+            install_solution_pack($key, true);
+            
+            // Return the results
+            echo drupal_json(array('status' => TRUE, 'data' => 'Success'));
+            
+            // Leave the function
+            return;
+        }
+    }
+   
+    // Send a failed message
     echo drupal_json(array('status' => TRUE, 'data' => "Failed"));
 }
 
@@ -234,40 +268,34 @@ function islandora_solution_pack_install_endpoint()
  */
 function islandora_solution_pack_status_endpoint()
 {
+    // Loop through the post data
     foreach($_POST as $key => $value) {
         
-        if ($_POST[$key] == 'Submit')
-        {
+        // Find a key with the value submit
+        if ($value == 'Submit') {
+            
+            // Check to see if it's installed
             if ( is_installed($json['module_name']) ) {
         
+                // Respond with Installed
                 echo drupal_json(array('status' => TRUE, 'data' => 'Installed'));
+                
+                // Leave the function
+                return;
+                
             } else {
                 
+                // Respond with Not Installed
                 echo drupal_json(array('status' => TRUE, 'data' => 'Not Installed'));
+
+                // Leave the function
+                return;
             }
         }
     }
   
-    // Not found
+    // Respond with module not found
     echo drupal_json(array('status' => TRUE, 'data' => 'Failed'));
-}
-
-/**
- * Debug Endpoint for showing all the data
- */
-function islandora_solution_pack_dump_endpoint()
-{
-    $enabled_solution_packs = module_invoke_all('register_solution_pack');
-    var_dump($enabled_solution_packs);
-
-    $forms = module_invoke_all('register_solution_pack_forms');
-    var_dump($forms);
-
-    $content_models = module_invoke_all('register_solution_pack_content_models');
-    var_dump($content_models);
-    
-    $collections = module_invoke_all('register_solution_pack_collection');
-    var_dump($collections);   
 }
 
 /**
