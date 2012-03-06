@@ -17,23 +17,16 @@ function islandora_solution_pack_menu() {
         'type' => MENU_NORMAL_ITEM
     );
     
-    $items['solution_pack/%module/install'] = array(
+    $items['solution_pack/install'] = array(
         'title' => 'Islandora New Solution Pack Installer',
         'description' => '',
         'page callback' => 'islandora_solution_pack_install_endpoint',
+        'page arguments' => array(1),
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
     
-    $items['solution_pack/%module/forceinstall'] = array(
-        'title' => 'Islandora New Solution Pack Installer',
-        'description' => '',
-        'page callback' => 'islandora_solution_pack_forceinstall_endpoint',
-        'access arguments' => array('access content'),
-        'type' => MENU_CALLBACK
-    );
-    
-    $items['solution_pack/%module/status'] = array(
+    $items['solution_pack/status'] = array(
         'title' => 'Islandora New Solution Pack Status',
         'description' => '',
         'page callback' => 'islandora_solution_pack_status_endpoint',
@@ -42,7 +35,7 @@ function islandora_solution_pack_menu() {
         'type' => MENU_CALLBACK
     );    
     
-    $items['solution_pack/debug/dump'] = array(
+    $items['solution_pack/dump'] = array(
         'title' => 'Islandora New Solution Pack Dump',
         'description' => '',
         'page callback' => 'islandora_solution_pack_dump_endpoint',
@@ -199,32 +192,23 @@ function islandora_solution_pack_admin_form_submit($form_id, $form_values) {
 /**
  * Endpoint for installing a solution pack 
  */
-function islandora_solution_pack_install_endpoint($module)
+function islandora_solution_pack_install_endpoint()
 {
-    echo("install" + $module);
-    //
-    install_solution_pack($module);
-}
-
-/**
- * Endpoint for forcing a reinstall of a solution pack
- */
-function islandora_solution_pack_forceinstall_endpoint($module)
-{
-    echo("force install" + $module);
-
-    install_solution_pack($module, true);
+    $json = json_decode($_POST['json_data']);
+    install_solution_pack($json['module_name']);
 }
 
 /**
  * Endpoint for getting the status of a solution
  */
-function islandora_solution_pack_status_endpoint($module)
+function islandora_solution_pack_status_endpoint()
 {
-    if ( is_installed($module) ) {
+    $json = json_decode($_POST['json_data']);
+
+    if ( is_installed($json['module_name']) ) {
         echo('installed');
     } 
-    echo('status: ' + $module);
+    echo('status: ' + $json['module_name']);
 }
 
 /**
