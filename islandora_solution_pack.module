@@ -21,7 +21,6 @@ function islandora_solution_pack_menu() {
         'title' => 'Islandora New Solution Pack Installer',
         'description' => '',
         'page callback' => 'islandora_solution_pack_install_endpoint',
-        'page arguments' => array(1),
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
@@ -30,7 +29,6 @@ function islandora_solution_pack_menu() {
         'title' => 'Islandora New Solution Pack Installer',
         'description' => '',
         'page callback' => 'islandora_solution_pack_forceinstall_endpoint',
-        'page arguments' => array(1),
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
@@ -39,7 +37,6 @@ function islandora_solution_pack_menu() {
         'title' => 'Islandora New Solution Pack Status',
         'description' => '',
         'page callback' => 'islandora_solution_pack_status_endpoint',
-        'page arguments' => array(1),
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );    
@@ -223,7 +220,7 @@ function islandora_solution_pack_install_endpoint()
         if ($value == 'Submit')
         {
             // Install the solution pack
-            install_solution_pack($key);
+            $results = install_solution_pack($key);
             
             // Return the results
             echo drupal_json(array('status' => TRUE, 'data' => 'Success'));
@@ -249,7 +246,7 @@ function islandora_solution_pack_forceinstall_endpoint()
         if ($value == 'Submit')
         {
             // Install the solution pack
-            install_solution_pack($key, true);
+            $results = install_solution_pack($key, true);
             
             // Return the results
             echo drupal_json(array('status' => TRUE, 'data' => 'Success'));
@@ -308,10 +305,10 @@ function islandora_solution_pack_status_endpoint()
 function install_solution_pack($module, $force=false)
 {
     // Check to see if there is anything to do
-    if ( is_installed($module) && $force == false)
-    {
-        return;
-    }
+//    if ( is_installed($module) && $force == false)
+//    {
+//        return ;
+//    }
     
     // Get the form details
     $form_details = module_invoke($module, 'register_solution_pack_forms');
